@@ -1,12 +1,15 @@
 // Example radius server doing authentication
 
 var radius = require('../lib/radius');
+
+radius.add_dictionary('./examples/mikrotik.rfc2865');
 var dgram = require("dgram");
 
-var secret = 'radius_secret';
+var secret = 'herma123';
 var server = dgram.createSocket("udp4");
 
 server.on("message", function (msg, rinfo) {
+  console.log('mesaageeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
   var code, username, password, packet;
   try {
     packet = radius.decode({packet: msg, secret: secret});
@@ -24,10 +27,11 @@ server.on("message", function (msg, rinfo) {
   password = packet.attributes['User-Password'];
 
   console.log('Access-Request for ' + username);
+  console.log('with password ' + password);
 
-  if (username == 'jlpicard' && password == 'beverly123') {
+  if (username == '80:AD:16:E4:DA:DD') {
     code = 'Access-Accept';
-  } else {
+  }  else {
     code = 'Access-Reject';
   }
 
