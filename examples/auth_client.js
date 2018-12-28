@@ -73,11 +73,18 @@ client.on('message', (msg, rinfo) => {
 
 const sent_packets = {};
 
-[packet_accepted, packet_rejected, packet_wrong_secret].forEach((packet) => {
-  const encoded = radius.encode(packet);
-  sent_packets[packet.identifier] = {
-    raw_packet: encoded,
-    secret: packet.secret,
-  };
-  client.send(encoded, 0, encoded.length, 1812, 'localhost');
-});
+const encoded = radius.encode(packet_wrong_secret);
+sent_packets[packet_wrong_secret.identifier] = {
+  raw_packet: encoded,
+  secret: packet_wrong_secret.secret,
+};
+client.send(encoded, 0, encoded.length, 1812, 'localhost');
+
+// [packet_accepted, packet_rejected, packet_wrong_secret].forEach((packet) => {
+//   const encoded = radius.encode(packet);
+//   sent_packets[packet.identifier] = {
+//     raw_packet: encoded,
+//     secret: packet.secret,
+//   };
+//   client.send(encoded, 0, encoded.length, 1812, 'localhost');
+// });

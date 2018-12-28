@@ -12,11 +12,16 @@ const server = dgram.createSocket('udp4');
 server.on('message', async (msg, rinfo) => {
   const packet = await readPacket(msg, secret);
   const username = packet.attributes['User-Name'];
-  console.log(packet, 'dsadsa');
+  // console.log(packet, 'dsadsa');
 
   if (packet.code === 'Access-Request') {
-    console.log(`------------------------${packet.code}----------------------`);
     checkAuth(username, packet, rinfo);
+    console.log(`${packet.code  } of user ${  username}`);
+  }
+  if (packet.code === 'Accounting-Request') {
+    console.log(packet);
+    console.log(packet.code + 'Acct-Status-Type:' + ' : ' + packet.attributes['Acct-Status-Type'] + 'user: ' + username);
+    sendResponde(packet, rinfo);
   }
 });
 
@@ -42,22 +47,21 @@ function readPacket(msg, secret) {
 }
 
 function checkAuth(username, packet, rinfo) {
-  if (db.includes(username)) {
-    console.log('siiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
+  // if (db.includes(username)) {
+  if (true) {
     sendAuth(true, username, packet, rinfo);
   } else {
-    console.log('nooooooooooooooooooooooooooooooooooo');
     sendAuth(false, username, packet, rinfo);
   }
 }
 
 
 function sendAuth(auth, username, packet, rinfo) {
-  console.log(buildResponse(auth, packet), 'responseeeeeeeeeeeeee');
+  // console.log(buildResponse(auth, packet), 'responseeeeeeeeeeeeee');
   const response = radius.encode_response(buildResponse(auth, packet));
-  console.log(response.code);
+  // console.log(response.code);
 
-  console.log(`Sending ${response.code} for user ${username}`);
+  // console.log(`Sending ${response.code} for user ${username}`);
   server.send(response, 0, response.length, rinfo.port, rinfo.address, (err) => {
     if (err) {
       console.log('Error sending response to ', rinfo);
@@ -67,4 +71,13 @@ function sendAuth(auth, username, packet, rinfo) {
 
 function buildResponse(auth, packet) {
   return auth ? { packet, code: 'Access-Accept', secret } : { packet, code: 'Access-Reject', secret };
+}
+
+function sendResponde(packet, rinfo) {
+  const response = radius.encode_response({ packet, code: 'Accounting-Response', secret });
+  server.send(response, 0, response.length, rinfo.port, rinfo.address, (err) => {
+    if (err) {
+      console.log('Error sending response to ', rinfo);
+    }
+  });
 }
